@@ -62,8 +62,13 @@ export default {
       this.$refs.cols.forEach(el => {
         new Sortable(el.$el, {
           group: 'module',
+          sort: false,
           animation: 150,
-          swapThreshold: 1
+          swapThreshold: 1,
+          onEnd: evt => {
+            console.log(evt)
+            this.modules[0].in = 2
+          }
         })
       })
     }
