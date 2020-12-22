@@ -6,6 +6,9 @@
       @mouseenter="show = true"
       @mouseleave="show = false">
       <div class="tool-bar__item">
+        自由：<el-switch v-model="mode" />
+      </div>
+      <div class="tool-bar__item">
         <el-button
           @click="handleAddModule">添加模块</el-button>
       </div>
@@ -29,26 +32,27 @@
       :visible.sync="dialog.updateColumns"
       title="调整列数"
       width="400px">
-      <el-input v-model="strColumns" />
+      <el-input v-model="strColumns" @keydown.native.enter="dialog.updateColumns = false" />
     </el-dialog>
   </div>
 </template>
 
 <script>
 import AddModule from './AddModule'
+import * as api from '@/api/module'
 
 export default {
   components: {
     AddModule
   },
   props: {
+    config: {
+      type: Object,
+      default: () => ({})
+    },
     modules: {
       type: Array,
       required: true
-    },
-    columns: {
-      type: [String, Array],
-      default: () => []
     }
   },
   data() {
@@ -62,12 +66,20 @@ export default {
     }
   },
   computed: {
-    strColumns: {
+    mode: {
       get() {
-        return typeof this.columns === 'string' ? this.columns : this.columns.join(':')
+        return this.config.type === 'free'
       },
       set(newVal) {
-        this.$emit('update:columns', newVal)
+        this.config.type = newVal ? 'free' : 'column'
+      }
+    },
+    strColumns: {
+      get() {
+        return typeof this.config.columns === 'string' ? this.config.columns : this.config.columns.join(':')
+      },
+      set(newVal) {
+        this.config.columns = newVal
       }
     }
   },
@@ -79,6 +91,7 @@ export default {
   methods: {
     handleAddModule() {
       this.module = {
+        id: +new Date() + Math.random(),
         name: '模块',
         in: null,
         index: null,
@@ -99,7 +112,7 @@ export default {
     },
     handleClearModules() {
       this.$confirm('确定清空所有模块？').then(() => {
-        localStorage.removeItem('_modules')
+        api.clear()
         this.modules.splice(0, this.modules.length)
       })
     }

@@ -1,39 +1,50 @@
 <template>
   <div id="app">
     <div class="app__inner">
-      <column-layout :modules="modules" :columns="columns" />
+      <column-layout v-if="config.type === 'column'" :modules="modules" :columns="config.columns" />
+      <free-layout v-else-if="config.type === 'free'" :modules="modules" />
     </div>
-    <tool-bar :modules="modules" :columns.sync="columns" />
+    <tool-bar :modules="modules" :config="config" />
   </div>
 </template>
 
 <script>
 import ColumnLayout from '@/components/ColumnLayout'
+import FreeLayout from '@/components/FreeLayout'
 import ToolBar from '@/components/ToolBar'
-
+import * as confApi from '@/api/config'
+import * as api from '@/api/module'
 
 export default {
   name: 'App',
   components: {
     ColumnLayout,
+    FreeLayout,
     ToolBar
   },
   data() {
     return {
-      modules: [],
-      columns: '1:3:1'
+      config: null,
+      modules: []
     }
   },
   watch: {
-    modules() {
-      localStorage.setItem('_modules', JSON.stringify(this.modules))
+    modules: {
+      deep: true,
+      handler(newVal) {
+        api.save(newVal)
+      }
+    },
+    config: {
+      deep: true,
+      handler(newVal) {
+        confApi.save(newVal)
+      }
     }
   },
   created() {
-    const str = localStorage.getItem('_modules')
-    if (str) {
-      this.modules = JSON.parse(str)
-    }
+    this.config = confApi.get()
+    this.modules = api.list()
   }
 }
 </script>

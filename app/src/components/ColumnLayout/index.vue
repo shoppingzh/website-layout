@@ -7,12 +7,15 @@
         :key="index"
         style="min-height: 100px;"
         :style="{ width: `${percent * 100}%` }">
-        <module-card
-          v-for="(module, index) in columnModules[index]"
-          :key="index"
-          :name="module.name"
-          :color="module.color"
-          :style="{ height: module.height + 'px' }" />
+        <draggable group="module" :list="columnModules[index]" style="padding-bottom: 20px;">
+          <module-card
+            :ref="`module${module.id}`"
+            v-for="(module) in columnModules[index]"
+            :key="module.id"
+            :name="module.name"
+            :color="module.color"
+            :style="{ height: module.height + 'px' }" />
+        </draggable>
       </el-col>
     </el-row>
   </div>
@@ -20,14 +23,22 @@
 
 <script>
 import layout from '../mixins/layout'
-import Sortable from 'sortablejs'
+import draggable from 'vuedraggable'
 
 export default {
   mixins: [layout],
+  components: {
+    draggable
+  },
   props: {
     columns: {
       type: [String, Array],
       default: '1:3:1'
+    }
+  },
+  data() {
+    return {
+      columnModules: {}
     }
   },
   computed: {
@@ -38,38 +49,68 @@ export default {
       const sum = this.columnArray.reduce((sum, value) => sum + value, 0)
       return this.columnArray.map(value => value / sum)
     },
-    columnModules() {
-      const map = {}
-      this.modules.forEach(module => {
-        let modules = map[module.in]
-        if (!modules) {
-          modules = []
-          map[module.in] = modules
-        }
-        modules.push(module)
-      })
-      return map
+    // columnModules: {
+    //   get() {
+    //     const map = {}
+    //     const modules = [...this.modules].sort((a, b) => a.index - b.index)
+    //     modules.forEach(module => {
+    //       let modules = map[module.in]
+    //       if (!modules) {
+    //         modules = []
+    //         map[module.in] = modules
+    //       }
+    //       modules.push(module)
+    //     })
+    //     return map
+    //   },
+    //   set(newVal) {
+    //     console.log(newVal)
+    //   }
+    // }
+  },
+  watch: {
+    modules: {
+      immediate: true,
+      handler(newVal) {
+        const map = {}
+        this.columnArray.forEach((column, index) => {
+          map[index] = newVal.filter(o => o.in === index)
+        })
+        Object.keys(map).forEach(key => {
+          map[key].sort((a, b) => a.index - b.index)
+        })
+        this.columnModules = map
+      }
+    },
+    columnModules: {
+      deep: true,
+      handler(newVal) {
+        Object.keys(newVal).forEach(key => {
+          const arr = newVal[key]
+          arr.forEach((module, index) => {
+            module.in = parseInt(key)
+            module.index = index
+          })
+        })
+      }
     }
   },
   mounted() {
-    this.resetSortable()
+    this.setLayoutPoints()
   },
   updated() {
-    this.resetSortable()
+    this.setLayoutPoints()
   },
   methods: {
-    resetSortable() {
-      this.$refs.cols.forEach(el => {
-        new Sortable(el.$el, {
-          group: 'module',
-          sort: false,
-          animation: 150,
-          swapThreshold: 1,
-          onEnd: evt => {
-            console.log(evt)
-            this.modules[0].in = 2
-          }
-        })
+    // 计算布局信息
+    setLayoutPoints() {
+      this.modules.forEach(module => {
+        const components = this.$refs[`module${module.id}`]
+        if (!components || !components.length) return
+        const el = components[0].$el
+        module.width = el.offsetWidth
+        module.x = el.offsetLeft
+        module.y = el.offsetTop
       })
     }
   }

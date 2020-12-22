@@ -26,6 +26,7 @@ export default {
     box-sizing: border-box;
     margin-bottom: 10px;
     cursor: pointer;
+    transition: none; // 这个千万不能开
     &__placeholder {
       position: absolute;
       left: 50%;
