@@ -3,7 +3,7 @@
     <moveable-card
       v-for="(module) in modules"
       :key="module.id"
-      :ref="`module${module.id}`"
+      ref="modules"
       :module="module"
       :name="module.name"
       :color="module.color"
@@ -14,8 +14,6 @@
 <script>
 import layout from '../mixins/layout'
 import MoveableCard from './MoveableCard'
-// import Moveable from 'moveable'
-// import * as api from '@/api/module'
 
 export default {
   mixins: [layout],
@@ -34,7 +32,24 @@ export default {
       }
     }
   },
+  updated() {
+    this.handleCalcBottom()
+  },
   mounted() {
+    this.handleCalcBottom()
+  },
+  methods: {
+    handleCalcBottom() {
+      let bottom = 0
+      this.$refs.modules.forEach(module => {
+        const el = module.$el
+        const currBottom = el.offsetTop + el.offsetHeight
+        if (currBottom > bottom) {
+          bottom = currBottom
+        }
+      })
+      this.$emit('change', bottom)
+    }
   }
 }
 </script>

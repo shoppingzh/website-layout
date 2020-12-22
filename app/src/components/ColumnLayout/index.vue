@@ -24,6 +24,7 @@
 <script>
 import layout from '../mixins/layout'
 import draggable from 'vuedraggable'
+import _ from 'lodash'
 
 export default {
   mixins: [layout],
@@ -48,25 +49,7 @@ export default {
     percentArray() {
       const sum = this.columnArray.reduce((sum, value) => sum + value, 0)
       return this.columnArray.map(value => value / sum)
-    },
-    // columnModules: {
-    //   get() {
-    //     const map = {}
-    //     const modules = [...this.modules].sort((a, b) => a.index - b.index)
-    //     modules.forEach(module => {
-    //       let modules = map[module.in]
-    //       if (!modules) {
-    //         modules = []
-    //         map[module.in] = modules
-    //       }
-    //       modules.push(module)
-    //     })
-    //     return map
-    //   },
-    //   set(newVal) {
-    //     console.log(newVal)
-    //   }
-    // }
+    }
   },
   watch: {
     modules: {
@@ -94,6 +77,16 @@ export default {
         })
       }
     }
+  },
+  created() {
+    this.$watch('columnArray', _.debounce((newVal) => {
+      const maxColumnIdx = newVal.length - 1
+      const unvisibleModules = this.modules.filter(module => module.in > maxColumnIdx)
+      let module = null
+      while((module = unvisibleModules.shift())) {
+        module.in = 0
+      }
+    }, 1000))
   },
   mounted() {
     this.setLayoutPoints()

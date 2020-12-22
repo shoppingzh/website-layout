@@ -32,7 +32,7 @@
       :visible.sync="dialog.updateColumns"
       title="调整列数"
       width="400px">
-      <el-input v-model="strColumns" @keydown.native.enter="dialog.updateColumns = false" />
+      <el-input v-model="strColumns" @keydown.native.enter="handleSaveColumns" />
     </el-dialog>
   </div>
 </template>
@@ -109,6 +109,9 @@ export default {
     },
     handleUpdateColumns() {
       this.dialog.updateColumns = true
+    },
+    handleSaveColumns() {
+      this.dialog.updateColumns = false
     },
     handleClearModules() {
       this.$confirm('确定清空所有模块？').then(() => {

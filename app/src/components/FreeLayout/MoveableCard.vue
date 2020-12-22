@@ -8,6 +8,7 @@
 
 <script>
 import Moveable from 'moveable'
+import _ from 'lodash'
 
 export default {
   props: {
@@ -17,7 +18,16 @@ export default {
     }
   },
   data() {
-    return {}
+    return {
+      cloneModule: Object.assign({}, this.module)
+    }
+  },
+  created() {
+    this.$watch('cloneModule', _.debounce(newVal => {
+      Object.assign(this.module, newVal)
+    }, 100), {
+      deep: true
+    })
   },
   mounted() {
     const moveable = new Moveable(this.$parent.$el, {
@@ -40,15 +50,19 @@ export default {
     })
     moveable.on('drag', e => {
       const delta = e.beforeDelta
-      this.module.x += delta[0]
-      this.module.y += delta[1]
+      this.cloneModule.x += delta[0]
+      this.cloneModule.y += delta[1]
+
+      this.$el.style.left = this.cloneModule.x + 'px'
+      this.$el.style.top = this.cloneModule.y + 'px'
     })
     moveable.on('resize', e => {
       // 以下写法会有问题：vue的更新速率导致宽高设置时出现跳动
-      // this.module.width += e.delta[0]
-      // this.module.height += e.delta[1]
-      this.$el.style.width = e.width + 'px'
-      this.$el.style.height = e.height + 'px'
+      this.cloneModule.width += e.delta[0]
+      this.cloneModule.height += e.delta[1]
+
+      this.$el.style.width = this.cloneModule.width + 'px'
+      this.$el.style.height = this.cloneModule.height + 'px'
     })
   }
 }
