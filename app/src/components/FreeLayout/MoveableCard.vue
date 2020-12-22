@@ -22,8 +22,10 @@ export default {
   mounted() {
     const moveable = new Moveable(this.$parent.$el, {
       target: this.$el,
+      origin: false,
       draggable: true,
       resizable: true,
+      zoom: .6,
       throttleDrag: 0,
       throttleResize: 0,
       scrollable: true,
@@ -42,8 +44,11 @@ export default {
       this.module.y += delta[1]
     })
     moveable.on('resize', e => {
-      this.module.width += e.delta[0]
-      this.module.height += e.delta[1]
+      // 以下写法会有问题：vue的更新速率导致宽高设置时出现跳动
+      // this.module.width += e.delta[0]
+      // this.module.height += e.delta[1]
+      this.$el.style.width = e.width + 'px'
+      this.$el.style.height = e.height + 'px'
     })
   }
 }
