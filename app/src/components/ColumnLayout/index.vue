@@ -24,6 +24,7 @@
 <script>
 import layout from '../mixins/layout'
 import draggable from 'vuedraggable'
+import { mapGetters } from 'vuex'
 import _ from 'lodash'
 
 export default {
@@ -43,6 +44,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters([
+      'mainWidth'
+    ]),
     columnArray() {
       return (typeof this.columns === 'string' ? this.columns.split(/[:：]/g) : this.columns).map(value => parseInt(value))
     },
@@ -101,8 +105,8 @@ export default {
         const components = this.$refs[`module${module.id}`]
         if (!components || !components.length) return
         const el = components[0].$el
-        module.width = el.offsetWidth
-        module.x = el.offsetLeft
+        module.width = el.offsetWidth / this.mainWidth
+        module.x = el.offsetLeft / this.mainWidth
         module.y = el.offsetTop
       })
     }

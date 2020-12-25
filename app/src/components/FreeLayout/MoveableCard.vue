@@ -8,6 +8,7 @@
 
 <script>
 import Moveable from 'moveable'
+import { mapGetters } from 'vuex'
 import _ from 'lodash'
 
 export default {
@@ -22,6 +23,11 @@ export default {
       cloneModule: Object.assign({}, this.module)
     }
   },
+  computed: {
+    ...mapGetters([
+      'mainWidth'
+    ])
+  },
   created() {
     this.$watch('cloneModule', _.debounce(newVal => {
       Object.assign(this.module, newVal)
@@ -30,7 +36,7 @@ export default {
     })
   },
   mounted() {
-    const moveable = new Moveable(this.$parent.$el, {
+    this.moveable = new Moveable(this.$parent.$el, {
       target: this.$el,
       origin: false,
       draggable: true,
@@ -48,22 +54,30 @@ export default {
         top: 0
       }
     })
-    moveable.on('drag', e => {
+    this.moveable.on('drag', e => {
       const delta = e.beforeDelta
-      this.cloneModule.x += delta[0]
+      this.cloneModule.x += delta[0] / this.mainWidth
       this.cloneModule.y += delta[1]
 
-      this.$el.style.left = this.cloneModule.x + 'px'
+      this.$el.style.left = (this.cloneModule.x * this.mainWidth) + 'px'
       this.$el.style.top = this.cloneModule.y + 'px'
     })
-    moveable.on('resize', e => {
+    this.moveable.on('resize', e => {
       // 以下写法会有问题：vue的更新速率导致宽高设置时出现跳动
-      this.cloneModule.width += e.delta[0]
+      this.cloneModule.width += e.delta[0] / this.mainWidth
       this.cloneModule.height += e.delta[1]
 
-      this.$el.style.width = this.cloneModule.width + 'px'
+      this.$el.style.width = (this.cloneModule.width * this.mainWidth) + 'px'
       this.$el.style.height = this.cloneModule.height + 'px'
     })
+  },
+  beforeDestroy() {
+    this.moveable.destroy()
+  },
+  methods: {
+    reloadMoveable() {
+      this.moveable && this.moveable.updateRect()
+    }
   }
 }
 </script>

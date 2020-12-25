@@ -5,22 +5,34 @@
       :class="{ 'is-hide': !show }"
       @mouseenter="show = true"
       @mouseleave="show = false">
-      <div class="tool-bar__item">
-        自由：<el-switch v-model="mode" />
-      </div>
-      <div class="tool-bar__item">
-        <el-button
-          @click="handleAddModule">添加模块</el-button>
-      </div>
-      <div class="tool-bar__item">
-        <el-button
-          @click="handleUpdateColumns">调整列数</el-button>
-      </div>
-      <div class="tool-bar__item">
-        <el-button
-          type="danger"
-          @click="handleClearModules">清空模块</el-button>
-      </div>
+      <el-form size="small" label-position="top" label-suffix="：">
+        <el-form-item label="网站布局形式">
+          <el-radio-group v-model="config.layout">
+            <el-radio :label="0">标准模式</el-radio>
+            <el-radio :label="1">自适应模式</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item v-if="config.layout === 0" label="网站宽度">
+          <el-slider v-model="config.width" :min="750" :max="1920" :marks="widthMarks" />
+        </el-form-item>
+        <el-form-item label="开启自由模式">
+          <el-switch v-model="mode" />
+        </el-form-item>
+        <el-form-item v-if="config.type === 'column'" label="调整列数">
+          <el-input v-model="config.columns" />
+        </el-form-item>
+        <el-form-item label="其他">
+          <div class="tool-bar__actions">
+            <el-button
+              @click="handleAddModule">添加模块</el-button>
+            <el-button
+              @click="handleUpdateColumns">调整列数</el-button>
+            <el-button
+              type="danger"
+              @click="handleClearModules">清空模块</el-button>
+          </div>
+        </el-form-item>
+      </el-form>
     </div>
     <el-dialog
       :visible.sync="dialog.add"
@@ -56,6 +68,11 @@ export default {
     }
   },
   data() {
+    this.widthMarks = {
+      960: '960',
+      1200: '1200',
+      1360: '1360',
+    }
     return {
       show: true,
       module: null,
@@ -130,11 +147,8 @@ export default {
     left: 0;
     top: 0;
     bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px 0;
-    width: 120px;
+    padding: 20px;
+    width: 300px;
     box-shadow: 0 0 4px rgba(0, 0, 0, .1), 3px 0 8px rgba(0, 0, 0, .15);
     background-color: #fff;
     transition: transform .3s;
@@ -144,8 +158,10 @@ export default {
         content: "";
       }
     }
-    &__item {
-      margin-bottom: 20px;
+    &__actions {
+      >>> .el-button {
+        margin-bottom: 20px;
+      }
     }
   }
 </style>

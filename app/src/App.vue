@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="app__inner" :style="{ height: currentContainerHeight }">
+    <div class="app__inner" :style="{ width: currentContainerWidth, height: currentContainerHeight }">
       <column-layout v-if="config.type === 'column'" :modules="modules" :columns="config.columns" />
       <free-layout
         v-else-if="config.type === 'free'"
@@ -15,7 +15,6 @@
 import ColumnLayout from '@/components/ColumnLayout'
 import FreeLayout from '@/components/FreeLayout'
 import ToolBar from '@/components/ToolBar'
-import * as confApi from '@/api/config'
 import * as api from '@/api/module'
 
 export default {
@@ -28,11 +27,17 @@ export default {
   data() {
     return {
       containerHeight: null,
-      config: null,
       modules: []
     }
   },
   computed: {
+    config() {
+      return this.$store.getters['config']
+    },
+    currentContainerWidth() {
+      if (!this.config) return 1200
+      return this.config.layout === 0 ? `${this.config.width}px` : `75%`
+    },
     currentContainerHeight() {
       if (!this.config) return null
       if (!this.containerHeight) return null
@@ -45,16 +50,9 @@ export default {
       handler(newVal) {
         api.save(newVal)
       }
-    },
-    config: {
-      deep: true,
-      handler(newVal) {
-        confApi.save(newVal)
-      }
     }
   },
   created() {
-    this.config = confApi.get()
     this.modules = api.list()
   },
   methods: {
@@ -69,7 +67,6 @@ export default {
   #app {
     min-height: 100vh;
     .app__inner {
-      width: 1200px;
       background-color: #fff;
       margin: auto;
     }

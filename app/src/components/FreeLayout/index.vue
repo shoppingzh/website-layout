@@ -14,6 +14,8 @@
 <script>
 import layout from '../mixins/layout'
 import MoveableCard from './MoveableCard'
+import { mapGetters } from 'vuex'
+import _ from 'lodash'
 
 export default {
   mixins: [layout],
@@ -21,16 +23,26 @@ export default {
     MoveableCard
   },
   computed: {
+    ...mapGetters([
+      'mainWidth'
+    ]),
     styles() {
       return module => {
         return {
-          width: `${module.width}px`,
+          width: `${module.width * this.mainWidth}px`,
           height: `${module.height}px`,
-          left: `${module.x}px`,
+          left: `${module.x * this.mainWidth}px`,
           top: `${module.y}px`
         }
       }
     }
+  },
+  created() {
+    this.$watch('mainWidth', _.debounce(() => {
+      this.$refs.modules.forEach(module => {
+        module.reloadMoveable()
+      })
+    }, 50))
   },
   updated() {
     this.handleCalcBottom()
