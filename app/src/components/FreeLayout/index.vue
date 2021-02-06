@@ -37,6 +37,15 @@ export default {
       }
     }
   },
+  watch: {
+    modules() {
+      this.$nextTick(() => {
+        this.$refs.modules.forEach(module => {
+          module.updateGuides()
+        })
+      })
+    }
+  },
   created() {
     this.$watch('mainWidth', _.debounce(() => {
       this.$refs.modules.forEach(module => {

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-row :gutter="10">
+    <el-row :gutter="10" type="flex" align="stretch">
       <el-col
         ref="cols"
         v-for="(percent, index) in percentArray"

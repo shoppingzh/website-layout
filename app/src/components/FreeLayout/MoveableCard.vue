@@ -41,13 +41,21 @@ export default {
       origin: false,
       draggable: true,
       resizable: true,
+      snappable: true,
+      elementGuidelines: Array.from(this.$el.parentNode.querySelectorAll('.module-card')),
+      isDisplaySnapDigit: true,
+      snapCenter: true,
+      snapDistFormat: v => `${v}px`,
+      // snapElement: true,
+      // verticalGuidelines: [0,200,400],
+      // horizontalGuidelines: [0,200,400],
       zoom: .6,
+      dragArea: true,
       throttleDrag: 0,
       throttleResize: 0,
       scrollable: true,
       scrollContainer: document.body,
       scrollThreshold: 0,
-      snappable: true,
       bounds: {
         left: 0,
         right: 1200,
@@ -61,6 +69,11 @@ export default {
 
       this.$el.style.left = (this.cloneModule.x * this.mainWidth) + 'px'
       this.$el.style.top = this.cloneModule.y + 'px'
+
+      this.$el.classList.add('is-dragging')
+    })
+    this.moveable.on('dragEnd', () => {
+      this.$el.classList.remove('is-dragging')
     })
     this.moveable.on('resize', e => {
       // 以下写法会有问题：vue的更新速率导致宽高设置时出现跳动
@@ -77,6 +90,9 @@ export default {
   methods: {
     reloadMoveable() {
       this.moveable && this.moveable.updateRect()
+    },
+    updateGuides() {
+      this.moveable.elementGuidelines = Array.from(this.$el.parentNode.querySelectorAll('.module-card'))
     }
   }
 }

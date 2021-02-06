@@ -36,5 +36,10 @@ export default {
       font-size: 20px;
       opacity: .8;
     }
+    &.is-dragging {
+      z-index: 10;
+      background-color: rgba(0, 0, 0, .05);
+      cursor: move;
+    }
   }
 </style>
